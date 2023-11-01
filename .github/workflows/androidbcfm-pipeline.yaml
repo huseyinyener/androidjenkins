@@ -1,0 +1,38 @@
+name: Android Build and Deploy
+
+on:
+  push:
+    branches:
+      - main  # Değiştirmeniz gereken ana dal adını buraya ekleyin.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: 21
+
+    - name: Set up Gradle
+      run: |
+        chmod +x gradlew
+      shell: bash
+
+    - name: Build Android project
+      run: ./gradlew build
+
+    - name: Upload APK to Artifactory
+      uses: jfrog/github-actions/publish@v1
+      with:
+        server-id: artifactory-server  # Artifactory sunucu kimliğini buraya ekleyin
+        repo: your-artifactory-repo    # Artifactory depo adını buraya ekleyin
+        file-spec: '{"files": [{"pattern": "**/build/outputs/apk/**/*.apk", "target": "your-artifactory-path/"}]}'  # APK dosyalarının nereye yükleneceğini belirtin
+
+      env:
+        ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
+        ARTIFACTORY_API_KEY: ${{ secrets.ARTIFACTORY_API_KEY }}
