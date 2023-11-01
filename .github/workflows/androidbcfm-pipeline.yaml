@@ -3,7 +3,7 @@ name: Android Build and Deploy
 on:
   push:
     branches:
-      - main  # Değiştirmeniz gereken ana dal adını buraya ekleyin.
+      - main  # Ana dal adınıza göre ayarlayın
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v2
       with:
-        java-version: 21
+        java-version: 21  
 
     - name: Set up Gradle
       run: |
@@ -26,13 +26,18 @@ jobs:
     - name: Build Android project
       run: ./gradlew build
 
-    - name: Upload APK to Artifactory
-      uses: jfrog/github-actions/publish@v1
+    - name: Upload APK to GitHub Releases
+      id: upload-apk
+      uses: actions/upload-release-asset@v1
       with:
-        server-id: artifactory-server  # Artifactory sunucu kimliğini buraya ekleyin
-        repo: your-artifactory-repo    # Artifactory depo adını buraya ekleyin
-        file-spec: '{"files": [{"pattern": "**/build/outputs/apk/**/*.apk", "target": "your-artifactory-path/"}]}'  # APK dosyalarının nereye yükleneceğini belirtin
+        upload_url: ${{ steps.create-release.outputs.upload_url }}
+        asset_path: app/build/outputs/apk/debug/app-debug.apk  # APK dosyasının yolunu ayarlayın
+        asset_name: app-debug.apk
 
+    - name: Create Release
+      id: create-release
+      uses: actions/create-release@v1
+      with:
+        files: app/build/outputs/apk/debug/app-debug.apk  # APK dosyasının yolunu tekrar ayarlayın
       env:
-        ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
-        ARTIFACTORY_API_KEY: ${{ secrets.ARTIFACTORY_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
