@@ -8,36 +8,39 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      
+      - name: 'Set up latest Oracle JDK 21'
+        uses: oracle-actions/setup-java@v1
+        with:
+          website: oracle.com
+          release: 21
+      
+      - name: Grant Execute Permission for gradlew
+        run: chmod +x ./gradlew
 
-    - name: 'Set up latest Oracle JDK 21'
-      uses: oracle-actions/setup-java@v1
-      with:
-        website: oracle.com
-        release: 21
+      - name: Build Android project
+        run: ./gradlew assembleDebug  # APK'yı derleyin
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.sha }}
+          draft: false
+          prerelease: false
 
-    - name: Set up Gradle
-      run: |
-        chmod +x gradlew
-      shell: bash
-
-    - name: Build Android project
-      run: ./gradlew build
-
-    - name: Upload APK to GitHub Releases
-      id: upload-apk
-      uses: actions/upload-release-asset@v1
-      with:
-        asset_path: app/build/outputs/apk/debug/app-debug.apk  # APK dosyasının yolunu ayarlayın
-        asset_name: app-debug.apk
-
-    - name: Create Release
-      id: create-release
-      uses: actions/create-release@v1
-      with:
-        files: app/build/outputs/apk/debug/app-debug.apk  # APK dosyasının yolunu tekrar ayarlayın
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload APK to GitHub Releases
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./app/build/outputs/apk/debug/app-debug.apk
+          asset_name: app-debug.apk
+          asset_content_type: application/vnd.android.package-archive
