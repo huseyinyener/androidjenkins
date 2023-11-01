@@ -24,14 +24,18 @@ jobs:
       - name: Build Android project
         run: ./gradlew assembleDebug  # APK'yı derleyin
       
+      - name: Generate Tag
+        id: tagger
+        run: echo "RELEASE_TAG=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+            
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.sha }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          release_name: Release ${{ env.RELEASE_TAG }}
           draft: false
           prerelease: false
 
