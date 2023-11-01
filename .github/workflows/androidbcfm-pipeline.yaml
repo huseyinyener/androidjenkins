@@ -31,7 +31,6 @@ jobs:
       id: upload-apk
       uses: actions/upload-release-asset@v1
       with:
-        upload_url: ${{ steps.create-release.outputs.upload_url }}
         asset_path: app/build/outputs/apk/debug/app-debug.apk  # APK dosyasının yolunu ayarlayın
         asset_name: app-debug.apk
 
