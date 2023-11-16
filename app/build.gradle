@@ -36,7 +36,7 @@ android {
             property "sonar.projectKey", "SonarTestAndroidKey"
             property "sonar. Language", "java"
             property "sonar.sourceEncoding", "UTF-8"
-            property "sonar.host.url", "http://http://44.207.58.108:9000"
+            property "sonar.host.url", "http://44.207.58.108:9000"
             property "sonar. Login", "b5e9e9da612735c4dd139dca73a843f09a2d4b00"
         }
     }
